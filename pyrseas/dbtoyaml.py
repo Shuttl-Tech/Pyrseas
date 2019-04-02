@@ -22,6 +22,27 @@ def main(schema=None):
     parser.add_argument('-x', '--no-privileges', action='store_true',
                         dest='no_privs',
                         help='exclude privilege (GRANT/REVOKE) information')
+
+    db_group = parser.add_argument_group("DB level Object exclusion options (defaults to all included)")
+    db_group.add_argument('--no-schemas', action='append_const',
+                          dest='exclude_objects', const='schemas',
+                          help='exclude all schemas')
+    db_group.add_argument('--no-casts', action='append_const',
+                          dest='exclude_objects', const='casts',
+                          help='exclude all casts')
+    db_group.add_argument('--no-extensions', action='append_const',
+                          dest='exclude_objects', const='extensions',
+                          help='exclude all extensions')
+    db_group.add_argument('--no-languages', action='append_const',
+                          dest='exclude_objects', const='languages',
+                          help='exclude all languages')
+    db_group.add_argument('--no-fdwrappers', action='append_const',
+                          dest='exclude_objects', const='fdwrappers',
+                          help='exclude all fdwrappers')
+    db_group.add_argument('--no-eventtrigs', action='append_const',
+                          dest='exclude_objects', const='eventtrigs',
+                          help='exclude all eventtrigs')
+
     group = parser.add_argument_group("Object inclusion/exclusion options",
                                       "(each can be given multiple times)")
     group.add_argument('-n', '--schema', metavar='SCHEMA', dest='schemas',
@@ -52,6 +73,7 @@ def main(schema=None):
         print(yamldump(dbmap), file=output or sys.stdout)
         if output:
             output.close()
+
 
 if __name__ == '__main__':
     main()

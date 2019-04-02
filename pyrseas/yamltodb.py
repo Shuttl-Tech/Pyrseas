@@ -33,6 +33,8 @@ def main():
     parser.add_argument('-n', '--schema', metavar='SCHEMA', dest='schemas',
                         action='append', default=[],
                         help="process only named schema(s) (default all)")
+    parser.add_argument('-l', '--relax-constraints', action='store_true',
+                        help="process only named schema(s) (default all)")
     cfg = parse_args(parser)
     output = cfg['files']['output']
     options = cfg['options']
@@ -78,6 +80,7 @@ def main():
                 print("Changes applied", file=sys.stderr)
         if output:
             output.close()
+
 
 if __name__ == '__main__':
     main()

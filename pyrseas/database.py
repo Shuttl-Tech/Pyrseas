@@ -476,16 +476,26 @@ class Database(object):
                         if (os.path.exists(filepath)):
                             os.remove(filepath)
 
-        dbmap = self.db.extensions.to_map(self.db, opts)
-        dbmap.update(self.db.languages.to_map(self.db, opts))
-        dbmap.update(self.db.casts.to_map(self.db, opts))
-        dbmap.update(self.db.fdwrappers.to_map(self.db, opts))
-        dbmap.update(self.db.eventtrigs.to_map(self.db, opts))
+        exclude_objects = opts.exclude_objects or []
+        dbmap = {}
+        if 'extensions' not in exclude_objects:
+            dbmap.update(self.db.extensions.to_map(self.db, opts))
+        if 'languages' not in exclude_objects:
+            dbmap.update(self.db.languages.to_map(self.db, opts))
+        if 'casts' not in exclude_objects:
+            dbmap.update(self.db.casts.to_map(self.db, opts))
+        if 'fdwrappers' not in exclude_objects:
+            dbmap.update(self.db.fdwrappers.to_map(self.db, opts))
+        if 'eventtrigs' not in exclude_objects:
+            dbmap.update(self.db.eventtrigs.to_map(self.db, opts))
+
         if 'datacopy' in self.config:
             opts.data_dir = self.config['files']['data_path']
             if not os.path.exists(opts.data_dir):
                 mkdir_parents(opts.data_dir)
-        dbmap.update(self.db.schemas.to_map(self.db, opts))
+
+        if 'schemas' not in exclude_objects:
+            dbmap.update(self.db.schemas.to_map(self.db, opts))
 
         if opts.multiple_files:
             with open(dbfilepath, 'w') as f:
@@ -524,6 +534,10 @@ class Database(object):
         langs = [lang[0] for lang in self.dbconn.fetchall(
             "SELECT tmplname FROM pg_pltemplate")]
         self.from_map(input_map, langs)
+
+        if opts.relax_constraints:
+            self.ndb.constraints.clear()
+
         if opts.revert:
             (self.db, self.ndb) = (self.ndb, self.db)
             del self.ndb.schemas['pg_catalog']
